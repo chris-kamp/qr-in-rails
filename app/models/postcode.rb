@@ -1,3 +1,3 @@
 class Postcode < ApplicationRecord
-  belongs_to :address
+  has_many :addresses
 end

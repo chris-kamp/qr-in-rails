@@ -3,8 +3,7 @@ class ApplicationController < ActionController::API
     begin
       token = request.headers["Authorization"].split(" ")[1]
       # Get payload by decoding JWT. Args are token, key, "true" to validate (including ensuring not expired), and algorithm type.
-      # TODO: Replace secretkey with an ENV variable
-      payload = JWT.decode(token, "secretkey", true, { algorithm: "HS512" })[0]
+      payload = JWT.decode(token, ENV["JWT_KEY"], true, { algorithm: "HS512" })[0]
       # Assign user email extracted from payload to an instance variable for use in controller actions
       @email = payload["email"]
     rescue

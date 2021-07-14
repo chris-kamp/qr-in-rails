@@ -1,3 +1,19 @@
 Rails.application.routes.draw do
-  # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
+  scope "/api/v1" do
+    # Generate standard user routes except create and destroy
+    resources :users, except: [:create, :destroy]
+
+    # Create custom user routes for login and registration
+    scope "/users" do
+      post "/login", to: "users#login", as: "login_user"
+      post "/register", to: "users#register", as: "register_user"
+    end
+
+    # Create standard routes for other resources
+    resources :checkins
+    resources :reviews
+    resources :addresses
+    resources :businesses
+    resources :categories
+  end
 end

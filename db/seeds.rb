@@ -4,6 +4,7 @@ Category.destroy_all
 user = User.create(
   email: "foo@bar.com",
   password: "password",
+  username: "foo",
   public: true,
   bio: "Hi, I'm a user"
 )

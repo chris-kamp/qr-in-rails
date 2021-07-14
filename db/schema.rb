@@ -10,23 +10,22 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_07_13_045919) do
+ActiveRecord::Schema.define(version: 2021_07_14_012649) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   create_table "addresses", force: :cascade do |t|
     t.bigint "state_id", null: false
-    t.bigint "street_id", null: false
     t.bigint "postcode_id", null: false
     t.bigint "suburb_id", null: false
     t.bigint "business_id", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "street"
     t.index ["business_id"], name: "index_addresses_on_business_id"
     t.index ["postcode_id"], name: "index_addresses_on_postcode_id"
     t.index ["state_id"], name: "index_addresses_on_state_id"
-    t.index ["street_id"], name: "index_addresses_on_street_id"
     t.index ["suburb_id"], name: "index_addresses_on_suburb_id"
   end
 
@@ -104,7 +103,6 @@ ActiveRecord::Schema.define(version: 2021_07_13_045919) do
   add_foreign_key "addresses", "businesses"
   add_foreign_key "addresses", "postcodes"
   add_foreign_key "addresses", "states"
-  add_foreign_key "addresses", "streets"
   add_foreign_key "addresses", "suburbs"
   add_foreign_key "businesses", "categories"
   add_foreign_key "businesses", "users"

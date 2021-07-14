@@ -1,3 +1,3 @@
 class Suburb < ApplicationRecord
-  belongs_to :address
+  has_many :addresses
 end

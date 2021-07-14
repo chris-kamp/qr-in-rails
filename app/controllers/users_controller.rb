@@ -1,10 +1,11 @@
 class UsersController < ApplicationController
   before_action :set_user, only: [:show, :update, :destroy]
+  # Require authentication to edit a user or retrieve a user's details
+  before_action :authenticate, only: [:index, :show, :update]
 
   # GET /users
   def index
     @users = User.all
-
     render json: @users, include: [:business], except: [:password_digest]
   end
 

@@ -58,7 +58,7 @@ class BusinessesController < ApplicationController
       suburb: Suburb.find_or_create_by(name: business[:address][:suburb]),
       postcode: Postcode.find_or_create_by(code: business[:address][:postcode]),
       state: State.find_or_create_by(name: business[:address][:state])
-    )
+    ) unless business[:address].nil?
 
     return business
   end

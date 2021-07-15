@@ -1,10 +1,11 @@
 User.destroy_all
 Category.destroy_all
+Business.destroy_all
 
 user = User.create(
   email: "foo@bar.com",
   password: "password",
-  username: "foo",
+  username: "foobar",
   public: true,
   bio: "Hi, I'm a user"
 )

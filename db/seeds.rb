@@ -1,5 +1,6 @@
 User.destroy_all
 Category.destroy_all
+Business.destroy_all
 
 users = User.create(
   [{email: "user1@user1.com",

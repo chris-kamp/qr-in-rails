@@ -1,6 +1,6 @@
 class ReviewsController < ApplicationController
     before_action :set_review, except: [:index, :create, :update, :destroy]
-    before_action :authenticate, only: [:create]
+    before_action :authenticate, only: [:create, :update, :destroy]
 
     def index
         render json: @reviews, include: [:user, :business]

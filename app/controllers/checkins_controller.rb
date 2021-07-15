@@ -1,5 +1,6 @@
 class CheckinsController < ApplicationController
     before_action :set_checkin, except: [:index, :create]
+    before_action :authenticate, only: [:create]
 
     def index
         render json: @checkins, include: [:user, :business]

@@ -20,6 +20,7 @@ address = Address.create(
   suburb: Suburb.create(name: "Brisbane City"),
   business: User.first.create_business(
     category: bar,
+    name: 'some business',
     description: "It's a business",
     address: address
   )

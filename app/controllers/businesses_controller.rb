@@ -49,16 +49,15 @@ class BusinessesController < ApplicationController
 
   def business_params
     # Permit only the attributes expected for Business.
-    # business = params.require(:business).permit()
-    business = params.permit(:category_id, :user_id, :name, :description, address: [:street, :suburb, :postcode, :state])
+    business = params.require(:business).permit(:category_id, :user_id, :name, :description, address: [:street, :suburb, :postcode, :state])
 
     # Change the [:address] object into the Address model, with Suburb, Postcode, State associations
     # using find_or_create_by to limit duplicate data.
     business[:address] = Address.new(
-      street: params[:address][:street],
-      suburb: Suburb.find_or_create_by(name: params[:address][:suburb]),
-      postcode: Postcode.find_or_create_by(code: params[:address][:postcode]),
-      state: State.find_or_create_by(name: params[:address][:state])
+      street: business[:address][:street],
+      suburb: Suburb.find_or_create_by(name: business[:address][:suburb]),
+      postcode: Postcode.find_or_create_by(code: business[:address][:postcode]),
+      state: State.find_or_create_by(name: business[:address][:state])
     )
 
     return business

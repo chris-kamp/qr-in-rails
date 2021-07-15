@@ -1,3 +1,5 @@
+Business.destroy_all
+
 User.destroy_all
 Category.destroy_all
 
@@ -24,4 +26,15 @@ address = Address.create(
     description: "It's a business",
     address: address
   )
+)
+
+Checkin.create(
+    user: user,
+    business: business
+)
+
+Review.create(
+    user: user,
+    business: business,
+    rating: 5
 )

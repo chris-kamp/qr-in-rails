@@ -1,8 +1,7 @@
 class ReviewsController < ApplicationController
-    # before_action :authenticate_user!
-    
+    before_action :set_review, except: [:index, :create, :update, :destroy]
+
     def index
-        @reviews = Review.all
         render json: @reviews, include: [:user, :business]
     end
 

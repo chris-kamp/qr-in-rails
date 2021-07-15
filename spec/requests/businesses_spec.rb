@@ -16,12 +16,28 @@ RSpec.describe "/businesses", type: :request do
   # This should return the minimal set of attributes required to create a valid
   # Business. As you add validations to Business, be sure to
   # adjust the attributes here as well.
+
+  User.create!(
+    email: "bar@foo.com",
+    password: "password",
+    username: "bar",
+    public: true,
+    bio: "Hi, I'm a user"
+  )
+  Category.create!(name: "bar")
+
   let(:valid_attributes) {
     {
       user_id: 1,
       category_id: 1,
       name: 'RSpec Business',
-      description: 'RSpec Business'
+      description: 'RSpec Business',
+      address: Address.create(
+        street: '123 foo',
+        suburb: Suburb.find_or_create_by(name: 'bar'),
+        postcode: Postcode.find_or_create_by(code: 1234),
+        state: State.find_or_create_by(name: 'xyz')
+      )
     }
   }
 
@@ -87,7 +103,7 @@ RSpec.describe "/businesses", type: :request do
         post businesses_url,
              params: { business: invalid_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
-        expect(response.content_type).to eq("application/json")
+        expect(response.content_type).to match(a_string_including("application/json"))
       end
     end
   end
@@ -121,7 +137,7 @@ RSpec.describe "/businesses", type: :request do
         patch business_url(business),
               params: { business: invalid_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
-        expect(response.content_type).to eq("application/json")
+        expect(response.content_type).to match(a_string_including("application/json"))
       end
     end
   end

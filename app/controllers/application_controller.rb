@@ -10,6 +10,5 @@ class ApplicationController < ActionController::API
       # If token invalid or other error occurs during authentication, render error with 401 status
       render json: { error: "Invalid token" }, status: :unauthorized
     end
-
   end
 end

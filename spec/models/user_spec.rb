@@ -1,6 +1,9 @@
 require 'rails_helper'
 
 RSpec.describe User, type: :model do
+  before(:all) do
+    User.destroy_all
+  end
   context ".create" do
     let(:valid_attributes) {
       {

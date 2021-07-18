@@ -6,11 +6,31 @@ class BusinessesController < ApplicationController
   end
 
   def index
-    render json: Business.order(created_at: :desc)
+    render json: Business.order(created_at: :desc), include: [{
+      address: {
+        only: :street,
+        include: [
+          suburb: { only: :name },
+          postcode: { only: :code },
+          state: { only: :name }
+        ]
+      },
+      category: { only: :name }
+    }]
   end
 
   def show
-    render json: @business, include: [:address]
+    render json: @business, include: [{
+      address: {
+        only: :street,
+        include: [
+          suburb: { only: :name },
+          postcode: { only: :code },
+          state: { only: :name }
+        ]
+      },
+      category: { only: :name }
+    }]
   end
 
   def create

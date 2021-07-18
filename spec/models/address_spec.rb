@@ -10,7 +10,7 @@ RSpec.describe Address, type: :model do
     Postcode.destroy_all
     State.destroy_all
 
-    @user     = User.create!(email: "test@test.com", password: "secret", username: "foobar", public: true, bio: "Hi, I'm a user")
+    @user     = User.create!(email: "test@test.com", password: "Secrets1", username: "foobar", public: true, bio: "Hi, I'm a user")
     @category = Category.create!(name: "bar")
     @business = Business.new(
       category_id: @category.id,

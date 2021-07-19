@@ -15,7 +15,8 @@ class BusinessesController < ApplicationController
           state: { only: :name }
         ]
       },
-      category: { only: :name }
+      category: { only: :name },
+      reviews: { only: :rating }
     }]
   end
 
@@ -29,7 +30,9 @@ class BusinessesController < ApplicationController
           state: { only: :name }
         ]
       },
-      category: { only: :name }
+      category: { only: :name },
+      reviews: {},
+      checkins: {}
     }]
   end
 

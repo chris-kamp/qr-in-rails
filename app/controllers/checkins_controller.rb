@@ -11,6 +11,7 @@ class CheckinsController < ApplicationController
            include: [
              { user: { only: :username } },
              { business: { only: :name } },
+             { review: { only: [rating, :content] } }
            ]
   end
 

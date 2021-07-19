@@ -1,8 +1,8 @@
 class User < ApplicationRecord
   has_secure_password
   has_one :business, dependent: :destroy
-  has_many :reviews, dependent: :destroy
   has_many :checkins, dependent: :destroy
+  has_many :reviews, through: :checkins
   # Username must be unique and between 4 and 20 characters
   validates :username, presence: true, uniqueness: true, length: { minimum: 4, maximum: 20 }
   # Email must be valid, unique and not more than 64 characters

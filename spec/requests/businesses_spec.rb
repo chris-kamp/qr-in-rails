@@ -22,7 +22,7 @@ RSpec.describe "/businesses", type: :request do
     Address.destroy_all
     Business.destroy_all
     Category.destroy_all
-    @user     = User.create!(email: "test@test.com", password: "secret", username: "foobar", public: true, bio: "Hi, I'm a user")
+    @user     = User.create!(email: "test@test.com", password: "Secrets1", username: "foobar", public: true, bio: "Hi, I'm a user")
     @category = Category.create!(name: "bar")
     @address  = Address.new(
       street: '123 foo',

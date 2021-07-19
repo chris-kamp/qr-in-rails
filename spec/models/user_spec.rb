@@ -8,7 +8,7 @@ RSpec.describe User, type: :model do
     let(:valid_attributes) {
       {
         email: "test@test.com",
-        password: "password",
+        password: "Password1",
         username: "test_user"
       }
     }

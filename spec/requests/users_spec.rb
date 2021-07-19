@@ -25,7 +25,7 @@ RSpec.describe "/users", type: :request do
   let(:valid_attributes) {
     {
       email: @email,
-      password: "password",
+      password: "Password1",
       username: "test_user"
     }
   }

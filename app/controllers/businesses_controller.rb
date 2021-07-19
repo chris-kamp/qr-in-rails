@@ -32,7 +32,11 @@ class BusinessesController < ApplicationController
       },
       category: { only: :name },
       reviews: {},
-      checkins: {}
+      checkins: {
+        include: [
+          user: { only: :username }
+        ]
+      }
     }]
   end
 

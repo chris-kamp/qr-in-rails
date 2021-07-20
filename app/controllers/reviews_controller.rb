@@ -7,8 +7,7 @@ class ReviewsController < ApplicationController
   end
 
   def show
-    render json: @review,
-           include: [{ user: { only: :username } }, business: { only: :name }]
+    render json: @review
   end
 
   def create
@@ -43,6 +42,6 @@ class ReviewsController < ApplicationController
   end
 
   def review_params
-    params.permit(:user_id, :business_id, :content, :rating)
+    params.permit(:checkin_id, :content, :rating)
   end
 end

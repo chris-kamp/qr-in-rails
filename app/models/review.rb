@@ -1,5 +1,4 @@
 class Review < ApplicationRecord
-  belongs_to :user
-  belongs_to :business
+  belongs_to :checkin
   validates :rating, presence: true
 end

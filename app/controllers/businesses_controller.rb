@@ -1,5 +1,5 @@
 class BusinessesController < ApplicationController
-  before_action :set_business, except: [:index, :create]
+  before_action :set_business, except: [:index, :create, :search]
 
   rescue_from ActiveRecord::RecordNotFound do |e|
     render json: { errors: e }, status: :not_found
@@ -20,6 +20,10 @@ class BusinessesController < ApplicationController
     }]
   end
 
+  def search
+    render plain: 'Search!'
+  end
+
   def show
     render json: @business, include: [{
       address: {
@@ -34,7 +38,8 @@ class BusinessesController < ApplicationController
       reviews: {},
       checkins: {
         include: [
-          user: { only: :username }
+          user: { only: :username },
+          review: { only: [:rating, :content] }
         ]
       }
     }]

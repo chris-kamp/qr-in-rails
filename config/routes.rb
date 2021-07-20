@@ -13,7 +13,9 @@ Rails.application.routes.draw do
     resources :checkins
     resources :reviews
     resources :addresses
-    resources :businesses
+    resources :businesses do
+      get :search, on: :collection
+    end
     resources :categories
   end
 end

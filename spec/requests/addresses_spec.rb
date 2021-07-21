@@ -13,15 +13,37 @@ require 'rails_helper'
 # sticking to rails and rspec-rails APIs to keep things simple and stable.
 
 RSpec.describe "/addresses", type: :request do
+  before(:all) do
+    User.destroy_all
+    Business.destroy_all
+    Category.destroy_all
+    Address.destroy_all
+
+    @user     = User.create!(email: "test@test.com", password: "Secrets1", username: "foobar", public: true, bio: "Hi, I'm a user")
+    @category = Category.create!(name: "bar")
+    @business = Business.new(
+      category_id: @category.id,
+      user_id: @user.id,
+      name: 'foo',
+      description: 'foo',
+    )
+  end
   # This should return the minimal set of attributes required to create a valid
   # Address. As you add validations to Address, be sure to
   # adjust the attributes here as well.
   let(:valid_attributes) {
-    skip("Add a hash of attributes valid for your model")
+    # skip("Add a hash of attributes valid for your model")
+    {
+      business: @business,
+      street: "123 Foo St",
+      suburb: Suburb.find_or_create_by(name: 'foo'),
+      postcode: Postcode.find_or_create_by(code: 1234),
+      state: State.find_or_create_by(name: 'ABC')
+    }
   }
 
   let(:invalid_attributes) {
-    skip("Add a hash of attributes invalid for your model")
+    # skip("Add a hash of attributes invalid for your model")
   }
 
   # This should return the minimal set of values that should be in the headers

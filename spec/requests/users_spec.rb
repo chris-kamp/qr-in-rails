@@ -13,8 +13,8 @@ require 'rails_helper'
 # sticking to rails and rspec-rails APIs to keep things simple and stable.
 
 RSpec.describe "/users", type: :request do
-
   before(:all) do
+    User.destroy_all
     @email = "test@test.com"
     @payload = { email: @email, exp: Time.now.to_i + 3600 }
     @token = JWT.encode(@payload, ENV["JWT_KEY"], "HS512")
@@ -25,7 +25,7 @@ RSpec.describe "/users", type: :request do
   let(:valid_attributes) {
     {
       email: @email,
-      password: "password",
+      password: "Password1",
       username: "test_user"
     }
   }

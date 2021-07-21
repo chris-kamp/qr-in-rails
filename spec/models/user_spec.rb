@@ -1,11 +1,14 @@
 require 'rails_helper'
 
 RSpec.describe User, type: :model do
+  before(:all) do
+    User.destroy_all
+  end
   context ".create" do
     let(:valid_attributes) {
       {
         email: "test@test.com",
-        password: "password",
+        password: "Password1",
         username: "test_user"
       }
     }

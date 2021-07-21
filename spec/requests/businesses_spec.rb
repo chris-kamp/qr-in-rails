@@ -17,27 +17,28 @@ RSpec.describe "/businesses", type: :request do
   # Business. As you add validations to Business, be sure to
   # adjust the attributes here as well.
 
-  User.create!(
-    email: "bar@foo.com",
-    password: "password",
-    username: "bar",
-    public: true,
-    bio: "Hi, I'm a user"
-  )
-  Category.create!(name: "bar")
+  before(:all) do
+    User.destroy_all
+    Address.destroy_all
+    Business.destroy_all
+    Category.destroy_all
+    @user     = User.create!(email: "test@test.com", password: "Secrets1", username: "foobar", public: true, bio: "Hi, I'm a user")
+    @category = Category.create!(name: "bar")
+    @address  = Address.new(
+      street: '123 foo',
+      suburb: Suburb.find_or_create_by(name: 'foo'),
+      postcode: Postcode.find_or_create_by(code: 1234),
+      state: State.find_or_create_by(name: 'ABC')
+    )
+  end
 
   let(:valid_attributes) {
     {
-      user_id: 1,
-      category_id: 1,
-      name: 'RSpec Business',
-      description: 'RSpec Business',
-      address: Address.create(
-        street: '123 foo',
-        suburb: Suburb.find_or_create_by(name: 'bar'),
-        postcode: Postcode.find_or_create_by(code: 1234),
-        state: State.find_or_create_by(name: 'xyz')
-      )
+      user_id: @user.id,
+      category_id: @category.id,
+      name: 'foo',
+      description: 'foo',
+      address: @address
     }
   }
 
@@ -111,7 +112,13 @@ RSpec.describe "/businesses", type: :request do
   describe "PATCH /update" do
     context "with valid parameters" do
       let(:new_attributes) {
-        skip("Add a hash of attributes valid for your model")
+        {
+          user_id: @user.id,
+          category_id: @category.id,
+          name: 'bar',
+          description: 'bar',
+          address: @address
+        }
       }
 
       it "updates the requested business" do
@@ -119,7 +126,7 @@ RSpec.describe "/businesses", type: :request do
         patch business_url(business),
               params: { business: new_attributes }, headers: valid_headers, as: :json
         business.reload
-        skip("Add assertions for updated state")
+        expect(business.name).to eq('bar')
       end
 
       it "renders a JSON response with the business" do

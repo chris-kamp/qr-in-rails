@@ -1,16 +1,71 @@
 class BusinessesController < ApplicationController
-  before_action :set_business, except: [:index, :create]
+  before_action :set_business, except: [:index, :create, :search]
 
   rescue_from ActiveRecord::RecordNotFound do |e|
     render json: { errors: e }, status: :not_found
   end
 
   def index
-    render json: Business.order(created_at: :desc)
+    render json: Business.order(created_at: :desc), include: [{
+      address: {
+        only: :street,
+        include: [
+          suburb: { only: :name },
+          postcode: { only: :code },
+          state: { only: :name }
+        ]
+      },
+      category: { only: :name },
+      reviews: { only: :rating }
+    }]
+  end
+
+  def search
+    filters = JSON(search_params[:filter])
+              .select { |_id, bool| bool }
+              .keys.map { |id| id.to_s[(1..-1)].strip }
+    results = Business.where('name ILIKE ?', "%#{search_params[:search]}%")
+    results = results.filter_by_category(filters) if filters.length > 0
+
+    render json: results, include: [{
+      address: {
+        only: :street,
+        include: [
+          suburb: { only: :name },
+          postcode: { only: :code },
+          state: { only: :name }
+        ]
+      },
+      category: { only: :name },
+      reviews: {},
+      checkins: {
+        include: [
+          user: { only: :username },
+          review: { only: [:rating, :content] }
+        ]
+      }
+    }]
   end
 
   def show
-    render json: @business, include: [:address]
+    render json: @business, include: [{
+      address: {
+        only: :street,
+        include: [
+          suburb: { only: :name },
+          postcode: { only: :code },
+          state: { only: :name }
+        ]
+      },
+      category: { only: :name },
+      reviews: {},
+      checkins: {
+        include: [
+          user: { only: :username },
+          review: { only: [:rating, :content] }
+        ]
+      }
+    }]
   end
 
   def create
@@ -29,11 +84,12 @@ class BusinessesController < ApplicationController
     if @business.update(business_params)
       render json: @business
     else
-      render json: @business.errors, status: :unprocessable_entity
+      render json: { errors: @business.errors }, status: :unprocessable_entity
     end
   end
 
   def destroy
+    # TODO: Replace with a soft-delete, and a restore option?
     if @business.destroy
       render status: :no_content
     else
@@ -61,5 +117,9 @@ class BusinessesController < ApplicationController
     ) unless business[:address].nil?
 
     return business
+  end
+
+  def search_params
+    params.permit(:search, :filter)
   end
 end

@@ -7,4 +7,6 @@ class Business < ApplicationRecord
 
   validates :name, presence: true, uniqueness: true
   validates :description, presence: true
+
+  scope :filter_by_category, ->(category_id) { where category_id: category_id }
 end

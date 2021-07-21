@@ -21,7 +21,12 @@ class BusinessesController < ApplicationController
   end
 
   def search
-    render plain: 'Search!'
+    puts '---1'
+    p search_params
+    puts '---2'
+    results = Business.where('name LIKE ?', "%#{search_params[:search]}%")
+    render json: results
+    # render plain: 'Search!'
   end
 
   def show
@@ -93,5 +98,12 @@ class BusinessesController < ApplicationController
     ) unless business[:address].nil?
 
     return business
+  end
+
+  def search_params
+    puts '---3'
+    p params
+    puts '---4'
+    params.permit(:search)
   end
 end

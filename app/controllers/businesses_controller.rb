@@ -21,12 +21,29 @@ class BusinessesController < ApplicationController
   end
 
   def search
-    puts '---1'
-    p search_params
-    puts '---2'
-    results = Business.where('name LIKE ?', "%#{search_params[:search]}%")
-    render json: results
-    # render plain: 'Search!'
+    filters = JSON(search_params[:filter])
+      .filter { |_, f| f }
+      .keys.map { |k| k.to_s[1].to_i }
+    results = Business.where('name LIKE ?', "%#{search_params[:search]}%").filter_by_category(filters)
+
+    render json: results, include: [{
+      address: {
+        only: :street,
+        include: [
+          suburb: { only: :name },
+          postcode: { only: :code },
+          state: { only: :name }
+        ]
+      },
+      category: { only: :name },
+      reviews: {},
+      checkins: {
+        include: [
+          user: { only: :username },
+          review: { only: [:rating, :content] }
+        ]
+      }
+    }]
   end
 
   def show
@@ -101,9 +118,6 @@ class BusinessesController < ApplicationController
   end
 
   def search_params
-    puts '---3'
-    p params
-    puts '---4'
-    params.permit(:search)
+    params.permit(:search, :filter)
   end
 end

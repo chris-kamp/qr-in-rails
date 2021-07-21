@@ -22,9 +22,11 @@ class BusinessesController < ApplicationController
 
   def search
     filters = JSON(search_params[:filter])
-      .filter { |_, f| f }
-      .keys.map { |k| k.to_s[1].to_i }
-    results = Business.where('name LIKE ?', "%#{search_params[:search]}%").filter_by_category(filters)
+              .select { |_id, bool| bool }
+              .keys.map { |id| id.to_s[1].to_i }
+
+    results = Business.where('name LIKE ?', "%#{search_params[:search]}%")
+    results = results.filter_by_category(filters) if filters.length > 0
 
     render json: results, include: [{
       address: {
@@ -88,6 +90,7 @@ class BusinessesController < ApplicationController
   end
 
   def destroy
+    # TODO: Replace with a soft-delete, and a restore option?
     if @business.destroy
       render status: :no_content
     else

@@ -23,9 +23,8 @@ class BusinessesController < ApplicationController
   def search
     filters = JSON(search_params[:filter])
               .select { |_id, bool| bool }
-              .keys.map { |id| id.to_s[1].to_i }
-
-    results = Business.where('name LIKE ?', "%#{search_params[:search]}%")
+              .keys.map { |id| id.to_s[(1..-1)].strip }
+    results = Business.where('name ILIKE ?', "%#{search_params[:search]}%")
     results = results.filter_by_category(filters) if filters.length > 0
 
     render json: results, include: [{

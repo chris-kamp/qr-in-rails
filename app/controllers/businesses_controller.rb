@@ -21,12 +21,30 @@ class BusinessesController < ApplicationController
   end
 
   def search
-    puts '---1'
-    p search_params
-    puts '---2'
-    results = Business.where('name LIKE ?', "%#{search_params[:search]}%")
-    render json: results
-    # render plain: 'Search!'
+    filters = JSON(search_params[:filter])
+              .select { |_id, bool| bool }
+              .keys.map { |id| id.to_s[(1..-1)].strip }
+    results = Business.where('name ILIKE ?', "%#{search_params[:search]}%")
+    results = results.filter_by_category(filters) if filters.length > 0
+
+    render json: results, include: [{
+      address: {
+        only: :street,
+        include: [
+          suburb: { only: :name },
+          postcode: { only: :code },
+          state: { only: :name }
+        ]
+      },
+      category: { only: :name },
+      reviews: {},
+      checkins: {
+        include: [
+          user: { only: :username },
+          review: { only: [:rating, :content] }
+        ]
+      }
+    }]
   end
 
   def show
@@ -66,11 +84,12 @@ class BusinessesController < ApplicationController
     if @business.update(business_params)
       render json: @business
     else
-      render json: @business.errors, status: :unprocessable_entity
+      render json: { errors: @business.errors }, status: :unprocessable_entity
     end
   end
 
   def destroy
+    # TODO: Replace with a soft-delete, and a restore option?
     if @business.destroy
       render status: :no_content
     else
@@ -101,9 +120,6 @@ class BusinessesController < ApplicationController
   end
 
   def search_params
-    puts '---3'
-    p params
-    puts '---4'
-    params.permit(:search)
+    params.permit(:search, :filter)
   end
 end

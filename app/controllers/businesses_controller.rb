@@ -1,5 +1,5 @@
 class BusinessesController < ApplicationController
-  before_action :set_business, except: [:index, :create]
+  before_action :set_business, except: [:index, :create, :search]
 
   rescue_from ActiveRecord::RecordNotFound do |e|
     render json: { errors: e }, status: :not_found
@@ -15,8 +15,18 @@ class BusinessesController < ApplicationController
           state: { only: :name }
         ]
       },
-      category: { only: :name }
+      category: { only: :name },
+      reviews: { only: :rating }
     }]
+  end
+
+  def search
+    puts '---1'
+    p search_params
+    puts '---2'
+    results = Business.where('name LIKE ?', "%#{search_params[:search]}%")
+    render json: results
+    # render plain: 'Search!'
   end
 
   def show
@@ -29,7 +39,14 @@ class BusinessesController < ApplicationController
           state: { only: :name }
         ]
       },
-      category: { only: :name }
+      category: { only: :name },
+      reviews: {},
+      checkins: {
+        include: [
+          user: { only: :username },
+          review: { only: [:rating, :content] }
+        ]
+      }
     }]
   end
 
@@ -81,5 +98,12 @@ class BusinessesController < ApplicationController
     ) unless business[:address].nil?
 
     return business
+  end
+
+  def search_params
+    puts '---3'
+    p params
+    puts '---4'
+    params.permit(:search)
   end
 end

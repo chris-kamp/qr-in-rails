@@ -85,7 +85,7 @@ class BusinessesController < ApplicationController
     if @business.update(business_params)
       render json: @business
     else
-      render json: @business.errors, status: :unprocessable_entity
+      render json: { errors: @business.errors }, status: :unprocessable_entity
     end
   end
 

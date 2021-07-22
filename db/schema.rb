@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_07_19_071755) do
+ActiveRecord::Schema.define(version: 2021_07_22_010915) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -96,6 +96,7 @@ ActiveRecord::Schema.define(version: 2021_07_19_071755) do
     t.string "username"
     t.text "bio"
     t.boolean "public"
+    t.string "profile_img_src"
   end
 
   add_foreign_key "addresses", "businesses"

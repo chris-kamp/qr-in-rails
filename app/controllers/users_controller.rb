@@ -1,5 +1,5 @@
 class UsersController < ApplicationController
-  before_action :set_user, only: %i[show update destroy]
+  before_action :set_user, only: %i[show show_public update destroy]
 
   # Require authentication to edit a user or retrieve a user's details
   before_action :authenticate, only: %i[index show update]
@@ -13,6 +13,12 @@ class UsersController < ApplicationController
   # GET /users/:id
   def show
     render json: @user, include: [:business], except: [:password_digest]
+  end
+
+  # GET /users/:id/public
+  # Retrieve only publically available information about a user, without requiring authentication
+  def show_public
+    render json: @user, only: [:username, :profile_img_src, :bio]
   end
 
   # POST /users/register
@@ -79,7 +85,7 @@ class UsersController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def user_params
-    params.permit(:email, :password, :username, :bio, :public)
+    params.permit(:email, :password, :username, :bio, :public, :profile_img_src)
   end
 
   def generate_token

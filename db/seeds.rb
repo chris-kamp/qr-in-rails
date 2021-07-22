@@ -10,30 +10,30 @@ users =
         password: 'Password1',
         username: 'user1',
         public: true,
-        bio: "Hi, I'm the first user",
+        bio: "Hi, I'm the first user"
       },
       {
         email: 'user2@user2.com',
         password: 'Password1',
         username: 'user2',
         public: false,
-        bio: "Hi, I'm the second user",
+        bio: "Hi, I'm the second user"
       },
       {
         email: 'user3@user3.com',
         password: 'Password1',
         username: 'user3',
         public: true,
-        bio: "Hi, I'm the third user",
+        bio: "Hi, I'm the third user"
       },
       {
         email: 'user4@user4.com',
         password: 'Password1',
         username: 'user4',
         public: false,
-        bio: "Hi, I'm the fourth user",
-      },
-    ],
+        bio: "Hi, I'm the fourth user"
+      }
+    ]
   )
 
 categories =
@@ -52,28 +52,33 @@ businesses =
             street: '123 Coder Street',
             postcode: Postcode.create(code: 4000),
             state: State.create(name: 'Queensland'),
-            suburb: Suburb.create(name: 'Brisbane City'),
-          ),
+            suburb: Suburb.create(name: 'Brisbane City')
+          )
       },
       {
         user: users[1],
         category: categories[1],
-        name: "Second business",
+        name: 'Second business',
         description: "It's the second business",
         address:
           Address.create(
-            street: "456 Fake Street",
+            street: '456 Fake Street',
             postcode: Postcode.create(code: 1234),
-            state: State.create(name: "New South Wales"),
-            suburb: Suburb.create(name: "Sydney")
+            state: State.create(name: 'New South Wales'),
+            suburb: Suburb.create(name: 'Sydney')
           )
       }
-    ],
+    ]
   )
 
-businesses[0].checkins.create(user: users[3], review: Review.create(rating: 3, content: "Extremely average"))
-businesses[0].checkins.create(user: users[2], review: Review.create(rating: 5, content: "Great"))
+businesses[0].checkins.create(user: users[3], review: Review.create(rating: 3, content: 'Extremely average'))
+businesses[0].checkins.create(user: users[2], review: Review.create(rating: 5, content: 'Great'))
 businesses[0].checkins.create(user: users[1])
-businesses[1].checkins.create(user: users[3], review: Review.create(rating: 4, content: "Pretty okay"))
+businesses[1].checkins.create(user: users[3], review: Review.create(rating: 4, content: 'Pretty okay'))
 businesses[1].checkins.create(user: users[2], review: Review.create(rating: 5))
-businesses[1].checkins.create(user: users[0], review: Review.create(rating: 1, content: "Not great"))
+businesses[1].checkins.create(user: users[0], review: Review.create(rating: 1, content: 'Not great'))
+
+businesses[0].promotions.create(description: 'This is an example promotion! 100% off everything!',
+                                end_date: Date.yesterday)
+businesses[0].promotions.create(description: 'Another example promotion!',
+                                end_date: Date.tomorrow)

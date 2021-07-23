@@ -81,7 +81,8 @@ class BusinessesController < ApplicationController
       reviews: {},
       checkins: {
         include: [
-          user: { only: :username },
+          user: { only: [:id, :username, :profile_img_src] },
+          business: { only: [:name, :id] },
           review: { only: %i[rating content] }
         ]
       }

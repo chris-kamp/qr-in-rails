@@ -18,7 +18,13 @@ class UsersController < ApplicationController
   # GET /users/:id/public
   # Retrieve only publically available information about a user, without requiring authentication
   def show_public
-    render json: @user, only: [:username, :profile_img_src, :bio]
+    render json: @user, only: [:username, :profile_img_src, :bio], include: { checkins: {
+      include: [
+        user: { only: [:username, :id, :profile_img_src] },
+        business: { only: [:name, :id] },
+        review: { only: %i[rating content] }
+      ]
+    } }
   end
 
   # POST /users/register

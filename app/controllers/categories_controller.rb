@@ -1,5 +1,5 @@
 class CategoriesController < ApplicationController
-  before_action :set_category, except: [:index, :create]
+  before_action :set_category, except: %i[index create]
 
   rescue_from ActiveRecord::RecordNotFound do |e|
     render json: { errors: e }, status: :not_found
@@ -27,7 +27,7 @@ class CategoriesController < ApplicationController
     if @category.update(category_params)
       render json: @category
     else
-      render json: @category.errors, status: :unprocessable_entity
+      render json: { errors: @category.errors }, status: :unprocessable_entity
     end
   end
 

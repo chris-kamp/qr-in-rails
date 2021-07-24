@@ -4,6 +4,10 @@ class UsersController < ApplicationController
   # Require authentication to edit a user or retrieve a user's details
   before_action :authenticate, only: %i[index show update]
 
+  rescue_from ActiveRecord::RecordNotFound do |e|
+    render json: { errors: e }, status: :not_found
+  end
+
   # GET /users
   def index
     @users = User.all

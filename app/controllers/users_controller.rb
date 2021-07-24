@@ -4,16 +4,10 @@ class UsersController < ApplicationController
   before_action :set_user, only: %i[show show_public update destroy]
 
   # Require authentication to edit a user or retrieve a user's details
-  before_action :authenticate, only: %i[index show update]
+  before_action :authenticate, only: %i[show update]
 
   rescue_from ActiveRecord::RecordNotFound do |e|
     render json: { errors: e }, status: :not_found
-  end
-
-  # GET /users
-  def index
-    @users = User.all
-    render json: @users, include: [:business], except: [:password_digest]
   end
 
   # GET /users/:id

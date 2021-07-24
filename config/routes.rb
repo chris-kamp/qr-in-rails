@@ -5,7 +5,7 @@ Rails
     resources :promotions
     scope '/api/v1' do
       # Generate standard user routes except create and destroy
-      resources :users, except: %i[create destroy]
+      resources :users, except: %i[create destroy index]
 
       # Create custom user routes
       scope '/users' do
@@ -15,13 +15,12 @@ Rails
       end
 
       # Create standard routes for other resources
-      resources :checkins
-      resources :reviews
-      resources :addresses
+      resources :checkins, only: :create
+      resources :reviews, only: :create
       resources :businesses do
         get :search, on: :collection
       end
-      resources :promotions
-      resources :categories
+      resources :promotions, only: :create
+      resources :categories, only: :index
     end
   end

@@ -146,7 +146,6 @@ class BusinessesController < ApplicationController
   end
 
   def destroy
-    # TODO: Replace with a soft-delete, and a restore option?
     if @business.destroy
       render status: :no_content
     else

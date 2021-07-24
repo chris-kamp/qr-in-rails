@@ -7,7 +7,7 @@
 
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
-    origins Rails.env == "development" ? "http://localhost:3000" : 'https://qr-in.netlify.app/'
+    origins Rails.env == "development" ? "http://localhost:3000" : 'https://qr-in.netlify.app'
 
     resource '*',
       headers: :any,

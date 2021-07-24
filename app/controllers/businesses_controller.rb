@@ -2,33 +2,6 @@ class BusinessesController < ApplicationController
   before_action :set_business, except: %i[index create search]
   before_action :authenticate, except: %i[index search show]
 
-  def okay
-    [
-      {
-        address: {
-          only: :street,
-          include: [
-            suburb: {
-              only: :name,
-            },
-            postcode: {
-              only: :code,
-            },
-            state: {
-              only: :name,
-            },
-          ],
-        },
-        category: {
-          only: :name,
-        },
-        reviews: {
-          only: :rating,
-        },
-      },
-    ]
-  end
-
   rescue_from ActiveRecord::RecordNotFound do |e|
     render json: { errors: e }, status: :not_found
   end

@@ -111,6 +111,4 @@ Rails.application.configure do
   # config.active_record.database_resolver = ActiveRecord::Middleware::DatabaseSelector::Resolver
   # config.active_record.database_resolver_context = ActiveRecord::Middleware::DatabaseSelector::Resolver::Session
 
-  # Set permitted CORS origin for production to front-end domain
-  config.allowed_cors_origins = 'https://qr-in.netlify.app/'
 end

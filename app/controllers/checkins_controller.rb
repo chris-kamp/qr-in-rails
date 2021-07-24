@@ -1,4 +1,6 @@
 class CheckinsController < ApplicationController
+  # Do not wrap params received from post in an additional named hash
+  wrap_parameters false
   before_action :set_checkin, only: [:show]
   before_action :authenticate, only: [:create]
 

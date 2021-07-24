@@ -1,6 +1,7 @@
 class UsersController < ApplicationController
+  # Do not wrap params received from post in an additional named hash
+  wrap_parameters false
   before_action :set_user, only: %i[show show_public update destroy]
-
   # Require authentication to edit a user or retrieve a user's details
   before_action :authenticate, only: %i[index show update]
 

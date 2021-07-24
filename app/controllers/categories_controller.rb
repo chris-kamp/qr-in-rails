@@ -1,4 +1,6 @@
 class CategoriesController < ApplicationController
+  # Do not wrap params received from post in an additional named hash
+  wrap_parameters false
   before_action :set_category, except: %i[index create]
 
   rescue_from ActiveRecord::RecordNotFound do |e|

@@ -1,4 +1,6 @@
 class ReviewsController < ApplicationController
+  # Do not wrap params received from post in an additional named hash
+  wrap_parameters false
   before_action :set_review, only: %i[show update destroy]
   before_action :authenticate, only: %i[create update destroy]
 

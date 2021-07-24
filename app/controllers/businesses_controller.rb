@@ -1,4 +1,6 @@
 class BusinessesController < ApplicationController
+  # Do not wrap params received from post in an additional named hash
+  wrap_parameters false
   before_action :set_business, except: %i[index create search]
   before_action :authenticate, except: %i[index search show]
 

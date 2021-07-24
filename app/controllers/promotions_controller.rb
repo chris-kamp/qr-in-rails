@@ -1,4 +1,6 @@
 class PromotionsController < ApplicationController
+  # Do not wrap params received from post in an additional named hash
+  wrap_parameters false
   def create
     # Create a Pusines with the promotion_params function as attributes.
     promotion = Promotion.new(promotion_params)

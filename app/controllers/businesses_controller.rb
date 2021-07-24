@@ -1,71 +1,153 @@
 class BusinessesController < ApplicationController
-  before_action :set_business, except: [:index, :create, :search]
+  before_action :set_business, except: %i[index create search]
+  before_action :authenticate, except: %i[index search show]
+
+  def okay
+    [
+      {
+        address: {
+          only: :street,
+          include: [
+            suburb: {
+              only: :name,
+            },
+            postcode: {
+              only: :code,
+            },
+            state: {
+              only: :name,
+            },
+          ],
+        },
+        category: {
+          only: :name,
+        },
+        reviews: {
+          only: :rating,
+        },
+      },
+    ]
+  end
 
   rescue_from ActiveRecord::RecordNotFound do |e|
     render json: { errors: e }, status: :not_found
   end
 
   def index
-    render json: Business.order(created_at: :desc), include: [{
-      address: {
-        only: :street,
-        include: [
-          suburb: { only: :name },
-          postcode: { only: :code },
-          state: { only: :name }
-        ]
-      },
-      category: { only: :name },
-      reviews: { only: :rating }
-    }]
+    render json: Business.order(created_at: :desc),
+           include: [
+             {
+               address: {
+                 only: :street,
+                 include: [
+                   suburb: {
+                     only: :name,
+                   },
+                   postcode: {
+                     only: :code,
+                   },
+                   state: {
+                     only: :name,
+                   },
+                 ],
+               },
+               category: {
+                 only: :name,
+               },
+               reviews: {
+                 only: :rating,
+               },
+             },
+           ]
   end
 
   def search
-    filters = JSON(search_params[:filter])
-              .select { |_id, bool| bool }
-              .keys.map { |id| id.to_s[(1..-1)].strip }
-    results = Business.where('name ILIKE ?', "%#{search_params[:search]}%")
-    results = results.filter_by_category(filters) if filters.length > 0
+    filters =
+      JSON(search_params[:filter])
+        .select { |_id, bool| bool }
+        .keys
+        .map { |id| id.to_s[(1..-1)].strip }
+    results =
+      Business.where(
+        'name ILIKE :search OR description ILIKE :search',
+        search: "%#{search_params[:search]}%",
+      )
 
-    render json: results, include: [{
-      address: {
-        only: :street,
-        include: [
-          suburb: { only: :name },
-          postcode: { only: :code },
-          state: { only: :name }
-        ]
-      },
-      category: { only: :name },
-      reviews: {},
-      checkins: {
-        include: [
-          user: { only: :username },
-          review: { only: [:rating, :content] }
-        ]
-      }
-    }]
+    results = results.filter_by_category(filters) unless filters.empty?
+
+    render json: results,
+           include: [
+             {
+               address: {
+                 only: :street,
+                 include: [
+                   suburb: {
+                     only: :name,
+                   },
+                   postcode: {
+                     only: :code,
+                   },
+                   state: {
+                     only: :name,
+                   },
+                 ],
+               },
+               category: {
+                 only: :name,
+               },
+               reviews: {},
+               checkins: {
+                 include: [
+                   user: {
+                     only: :username,
+                   },
+                   review: {
+                     only: %i[rating content],
+                   },
+                 ],
+               },
+             },
+           ]
   end
 
   def show
-    render json: @business, include: [{
-      address: {
-        only: :street,
-        include: [
-          suburb: { only: :name },
-          postcode: { only: :code },
-          state: { only: :name }
-        ]
-      },
-      category: { only: :name },
-      reviews: {},
-      checkins: {
-        include: [
-          user: { only: :username },
-          review: { only: [:rating, :content] }
-        ]
-      }
-    }]
+    render json: @business,
+           methods: :active_promotions,
+           include: [
+             {
+               address: {
+                 only: :street,
+                 include: [
+                   suburb: {
+                     only: :name,
+                   },
+                   postcode: {
+                     only: :code,
+                   },
+                   state: {
+                     only: :name,
+                   },
+                 ],
+               },
+               category: {
+                 only: :name,
+               },
+               reviews: {},
+               checkins: {
+                 include: [
+                   user: {
+                     only: %i[id username profile_img_src],
+                   },
+                   business: {
+                     only: %i[name id listing_img_src],
+                   },
+                   review: {
+                     only: %i[rating content],
+                   },
+                 ],
+               },
+             },
+           ]
   end
 
   def create
@@ -105,18 +187,32 @@ class BusinessesController < ApplicationController
 
   def business_params
     # Permit only the attributes expected for Business.
-    business = params.require(:business).permit(:category_id, :user_id, :name, :description, address: [:street, :suburb, :postcode, :state])
+    business =
+      params
+        .require(:business)
+        .permit(
+          :category_id,
+          :user_id,
+          :name,
+          :description,
+          :listing_img_src,
+          address: %i[street suburb postcode state],
+        )
 
     # Change the [:address] object into the Address model, with Suburb, Postcode, State associations
     # using find_or_create_by to limit duplicate data.
-    business[:address] = Address.new(
-      street: business[:address][:street],
-      suburb: Suburb.find_or_create_by(name: business[:address][:suburb]),
-      postcode: Postcode.find_or_create_by(code: business[:address][:postcode]),
-      state: State.find_or_create_by(name: business[:address][:state])
-    ) unless business[:address].nil?
+    unless business[:address].nil?
+      business[:address] =
+        Address.new(
+          street: business[:address][:street],
+          suburb: Suburb.find_or_create_by(name: business[:address][:suburb]),
+          postcode:
+            Postcode.find_or_create_by(code: business[:address][:postcode]),
+          state: State.find_or_create_by(name: business[:address][:state]),
+        )
+    end
 
-    return business
+    business
   end
 
   def search_params

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_07_19_071755) do
+ActiveRecord::Schema.define(version: 2021_07_23_073322) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -36,6 +36,7 @@ ActiveRecord::Schema.define(version: 2021_07_19_071755) do
     t.text "description"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "listing_img_src"
     t.index ["category_id"], name: "index_businesses_on_category_id"
     t.index ["user_id"], name: "index_businesses_on_user_id"
   end
@@ -59,6 +60,15 @@ ActiveRecord::Schema.define(version: 2021_07_19_071755) do
     t.integer "code"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "promotions", force: :cascade do |t|
+    t.bigint "business_id"
+    t.string "description"
+    t.datetime "end_date"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["business_id"], name: "index_promotions_on_business_id"
   end
 
   create_table "reviews", force: :cascade do |t|
@@ -96,6 +106,7 @@ ActiveRecord::Schema.define(version: 2021_07_19_071755) do
     t.string "username"
     t.text "bio"
     t.boolean "public"
+    t.string "profile_img_src"
   end
 
   add_foreign_key "addresses", "businesses"

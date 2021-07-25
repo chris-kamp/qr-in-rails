@@ -1,4 +1,30 @@
 class PromotionsController < ApplicationController
+  before_action :authenticate, except: %i[index]
+
+  def index
+    render json: Promotion.active.order(created_at: :desc), include: [
+      business: {
+        include: {
+          reviews: {},
+          address: {
+            only: :street,
+            include: [
+              suburb: {
+                only: :name
+              },
+              postcode: {
+                only: :code
+              },
+              state: {
+                only: :name
+              }
+            ]
+          }
+        }
+      }
+    ]
+  end
+
   def create
     # Create a Pusines with the promotion_params function as attributes.
     promotion = Promotion.new(promotion_params)

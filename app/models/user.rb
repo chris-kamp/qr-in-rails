@@ -1,7 +1,7 @@
 class User < ApplicationRecord
   has_secure_password
   has_one :business, dependent: :destroy
-  has_many :checkins, dependent: :destroy
+  has_many :checkins, -> { order(created_at: :desc) }, dependent: :destroy
   has_many :reviews, through: :checkins
 
   # Username must be unique and between 4 and 20 characters

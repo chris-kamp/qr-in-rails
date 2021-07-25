@@ -12,7 +12,7 @@ class UsersController < ApplicationController
 
   # GET /users/:id
   def show
-    render json: @user, include: [:business], except: [:password_digest]
+    render json: @user, include: { business: { only: :id } }, except: [:password_digest]
   end
 
   # GET /users/:id/public

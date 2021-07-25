@@ -3,7 +3,15 @@ class ReviewsController < ApplicationController
   wrap_parameters false
   before_action :authenticate
 
+  # Will trigger if the given checkin_id is not valid
+  rescue_from ActiveRecord::RecordNotFound do |e|
+    render json: { errors: e }, status: :not_found
+  end
+
   def create
+    @checkin = Checkin.find(params[:checkin_id])
+    return unless authorize(@checkin.user)
+
     @review = Review.new(review_params)
     if @review.save
       render json: @review, status: :created

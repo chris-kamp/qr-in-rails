@@ -138,6 +138,7 @@ class BusinessesController < ApplicationController
   end
 
   def update
+    return unless authorize(@business.user)
     if @business.update(business_params)
       render json: @business
     else
@@ -146,6 +147,7 @@ class BusinessesController < ApplicationController
   end
 
   def destroy
+    return unless authorize(@business.user)
     if @business.destroy
       render status: :no_content
     else

@@ -12,6 +12,7 @@ class UsersController < ApplicationController
 
   # GET /users/:id
   def show
+    return unless authorize(@user)
     render json: @user, include: { business: { only: :id } }, except: [:password_digest]
   end
 
@@ -86,6 +87,7 @@ class UsersController < ApplicationController
 
   # PATCH/PUT /users/:id
   def update
+    return unless authorize(@user)
     if @user.update(user_params)
       render json: @user, except: [:password_digest]
     else

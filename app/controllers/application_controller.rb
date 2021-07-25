@@ -23,4 +23,12 @@ class ApplicationController < ActionController::API
     end
     return true
   end
+
+  def exclude(prohibited_user)
+    if @current_user == prohibited_user
+      render status: :forbidden
+      return true
+    end
+    return false
+  end
 end

@@ -11,6 +11,7 @@ class ReviewsController < ApplicationController
   def create
     @checkin = Checkin.find(params[:checkin_id])
     return unless authorize(@checkin.user)
+    return if exclude(@checkin.business.user)
 
     @review = Review.new(review_params)
     if @review.save

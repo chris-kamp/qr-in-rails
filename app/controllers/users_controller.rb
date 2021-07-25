@@ -109,7 +109,7 @@ class UsersController < ApplicationController
   def generate_token
     # JWT token payload contains user's email address and session expiry time (currently 1 hour)
     # Assumes @user variable has been set before this method is called
-    payload = { email: @user.email, exp: Time.now.to_i + 3600 }
+    payload = { email: @user.email, exp: Time.now.to_i + (3600 * 24) }
 
     # Create JWT token with payload, key and HS512 encryption
     @token = JWT.encode(payload, ENV['JWT_KEY'], 'HS512')

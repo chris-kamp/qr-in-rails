@@ -1,11 +1,35 @@
 class PromotionsController < ApplicationController
   # Do not wrap params received from post in an additional named hash
   wrap_parameters false
-  before_action :authenticate
-  
+  before_action :authenticate, except: %i[index]
+
   # Will trigger if the given business_id is not valid
   rescue_from ActiveRecord::RecordNotFound do |e|
     render json: { errors: e }, status: :not_found
+  end
+
+  def index
+    render json: Promotion.active.order(created_at: :desc), include: [
+      business: {
+        include: {
+          reviews: {},
+          address: {
+            only: :street,
+            include: [
+              suburb: {
+                only: :name
+              },
+              postcode: {
+                only: :code
+              },
+              state: {
+                only: :name
+              }
+            ]
+          }
+        }
+      }
+    ]
   end
 
   def create

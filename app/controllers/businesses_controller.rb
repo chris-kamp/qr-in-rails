@@ -11,6 +11,7 @@ class BusinessesController < ApplicationController
   def index
     businesses = Business.order(created_at: :desc)
     businesses.limit!(search_params[:limit]) if search_params[:limit]
+    
     render json: businesses,
            include: [
              {

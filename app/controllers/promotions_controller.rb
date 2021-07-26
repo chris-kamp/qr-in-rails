@@ -9,7 +9,9 @@ class PromotionsController < ApplicationController
   end
 
   def index
-    render json: Promotion.active.order(created_at: :desc), include: [
+    promotions = Promotion.active.order(created_at: :desc)
+    promotions.limit!(search_params[:limit]) if search_params[:limit]
+    render json: promotions, include: [
       business: {
         include: {
           reviews: {},
@@ -48,6 +50,10 @@ class PromotionsController < ApplicationController
   end
 
   private
+
+  def search_params
+    params.permit(:limit)
+  end
 
   def promotion_params
     params.require(:promotion).permit(:business_id, :description, :end_date)

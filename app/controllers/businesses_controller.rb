@@ -9,7 +9,9 @@ class BusinessesController < ApplicationController
   end
 
   def index
-    render json: Business.order(created_at: :desc),
+    businesses = Business.order(created_at: :desc)
+    businesses.limit!(search_params[:limit]) if search_params[:limit]
+    render json: businesses,
            include: [
              {
                address: {
@@ -192,6 +194,6 @@ class BusinessesController < ApplicationController
   end
 
   def search_params
-    params.permit(:search, :filter)
+    params.permit(:search, :filter, :limit)
   end
 end

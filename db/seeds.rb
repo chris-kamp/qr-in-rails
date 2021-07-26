@@ -67,7 +67,20 @@ businesses =
             state: State.create(name: 'New South Wales'),
             suburb: Suburb.create(name: 'Sydney')
           )
-      }
+      },
+      {
+        user: users[2],
+        category: categories[1],
+        name: 'Third business',
+        description: "It's the third business",
+        address:
+          Address.create(
+            street: '789 Fake Street',
+            postcode: Postcode.create(code: 6789),
+            state: State.create(name: 'New South Wales'),
+            suburb: Suburb.create(name: 'Sydney')
+          )
+      },
     ]
   )
 

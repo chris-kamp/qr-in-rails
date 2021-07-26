@@ -48,14 +48,6 @@ RSpec.describe "/users", type: :request do
     }
   }
 
-  describe "GET /index" do
-    it "renders a successful response with valid headers" do
-      User.create! valid_attributes
-      get users_url, headers: valid_headers, as: :json
-      expect(response).to be_successful
-    end
-  end
-
   describe "GET /show" do
     it "renders a successful response with valid headers" do
       user = User.create! valid_attributes

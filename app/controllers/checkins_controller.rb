@@ -1,21 +1,20 @@
 class CheckinsController < ApplicationController
-  before_action :set_checkin, only: [:show]
-  before_action :authenticate, only: [:create]
+  # Do not wrap params received from post in an additional named hash
+  wrap_parameters false
+  before_action :authenticate
 
-  def index
-    render status: :not_implemented
-  end
-
-  def show
-    render json: @checkin,
-           include: [
-             { user: { only: :username } },
-             { business: { only: :name } },
-             { review: { only: [rating, :content] } }
-           ]
+  # Will trigger if the given business_id or user_id is not valid
+  rescue_from ActiveRecord::RecordNotFound do |e|
+    render json: { errors: e }, status: :not_found
   end
 
   def create
+    # Current user must match the given user_id, and must not be the owner of the business with the given business_id
+    @user = User.find(params[:user_id])
+    return unless authorize(@user)
+    @business = Business.find(params[:business_id])
+    return if exclude(@business.user)
+
     @checkin = Checkin.new(checkin_params)
 
     if @checkin.save
@@ -26,10 +25,6 @@ class CheckinsController < ApplicationController
   end
 
   private
-
-  def set_checkin
-    @checkin = Checkin.find(params[:id])
-  end
 
   def checkin_params
     params.permit(:user_id, :business_id)

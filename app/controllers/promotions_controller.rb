@@ -1,9 +1,7 @@
 class PromotionsController < ApplicationController
-  before_action :authenticate, except: %i[index]
-
   # Do not wrap params received from post in an additional named hash
   wrap_parameters false
-  before_action :authenticate
+  before_action :authenticate, except: %i[index]
 
   # Will trigger if the given business_id is not valid
   rescue_from ActiveRecord::RecordNotFound do |e|
@@ -32,6 +30,7 @@ class PromotionsController < ApplicationController
         }
       }
     ]
+  end
 
   def create
     @business = Business.find(params[:promotion][:business_id])

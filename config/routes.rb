@@ -20,7 +20,7 @@ Rails
       resources :businesses do
         get :search, on: :collection
       end
-      resources :promotions, only: :create
+      resources :promotions, only: %i[create index]
       resources :categories, only: :index
     end
   end

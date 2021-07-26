@@ -1,40 +1,18 @@
 class BusinessesController < ApplicationController
+  # Do not wrap params received from post in an additional named hash
+  wrap_parameters false
   before_action :set_business, except: %i[index create search]
   before_action :authenticate, except: %i[index search show]
-
-  def okay
-    [
-      {
-        address: {
-          only: :street,
-          include: [
-            suburb: {
-              only: :name,
-            },
-            postcode: {
-              only: :code,
-            },
-            state: {
-              only: :name,
-            },
-          ],
-        },
-        category: {
-          only: :name,
-        },
-        reviews: {
-          only: :rating,
-        },
-      },
-    ]
-  end
 
   rescue_from ActiveRecord::RecordNotFound do |e|
     render json: { errors: e }, status: :not_found
   end
 
   def index
-    render json: Business.order(created_at: :desc),
+    businesses = Business.order(created_at: :desc)
+    businesses.limit!(search_params[:limit]) if search_params[:limit]
+    
+    render json: businesses,
            include: [
              {
                address: {
@@ -163,6 +141,7 @@ class BusinessesController < ApplicationController
   end
 
   def update
+    return unless authorize(@business.user)
     if @business.update(business_params)
       render json: @business
     else
@@ -171,7 +150,7 @@ class BusinessesController < ApplicationController
   end
 
   def destroy
-    # TODO: Replace with a soft-delete, and a restore option?
+    return unless authorize(@business.user)
     if @business.destroy
       render status: :no_content
     else
@@ -216,6 +195,6 @@ class BusinessesController < ApplicationController
   end
 
   def search_params
-    params.permit(:search, :filter)
+    params.permit(:search, :filter, :limit)
   end
 end

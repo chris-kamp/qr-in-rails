@@ -12,7 +12,7 @@ class CheckinsController < ApplicationController
     @checkins = Checkin.order(created_at: :desc)
     @checkins.limit!(params[:limit]) if params[:limit]
     render json: @checkins,
-           only: :id,
+           only: [:id, :created_at],
            include: [
              user: {
                only: %i[username id profile_img_src],

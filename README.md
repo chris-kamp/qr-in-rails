@@ -1,24 +1,15 @@
-# README
+# About
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+QR-IN was created using React and Ruby on Rails by Anthony Beck and Chris Kamp as coursework for the Coder Academy bootcamp course.
 
-Things you may want to cover:
+The purpose of the application is to provide a platform for users to share locations they have visited (along with reviews and ratings), and for other users to find popular or highly-rated locations. The app attempts to minimise the "friction" involved in sharing businesses or locations you enjoy with others by enabling users to "check in" by simply scanning a QR code (a process which should already be familiar to anyone who has used COVID contact-tracing apps). The app also enables business owners to promote their business by encouraging users to check in with timed promotional events offering discounts or other incentives.
 
-* Ruby version
+# Application
 
-* System dependencies
+The live application can be accessed [here](https://qr-in.netlify.app/).
 
-* Configuration
+# Development
 
-* Database creation
+This repository contains the source code for the back-end Ruby on Rails server. The front-end React repository can be found [here](https://github.com/chris-kamp/qr-in-react).
 
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+To run the server in development, clone this repository, run ```bundle install``` to install dependencies and run ```rails s``` to start the development server. To run automated tests using RSpec, run ```rspec```.

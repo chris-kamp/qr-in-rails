@@ -26,5 +26,9 @@ RSpec.describe BusinessesController, type: :routing do
     it "routes to #destroy" do
       expect(delete: "/api/v1/businesses/1").to route_to("businesses#destroy", id: "1")
     end
+
+    it "routes to #search" do
+      expect(get: "/api/v1/businesses/search").to route_to("businesses#search")
+    end
   end
 end

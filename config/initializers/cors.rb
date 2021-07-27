@@ -7,10 +7,8 @@
 
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
-    # TODO: Whitelist only required domains in production environment
-    origins '*'
+    origins Rails.env == "development" ? "http://localhost:3000" : 'https://qr-in.netlify.app'
 
-    # TODO: Limit CORS application to specific resources and/or methods if applicable
     resource '*',
       headers: :any,
       methods: [:get, :post, :put, :patch, :delete, :options, :head]

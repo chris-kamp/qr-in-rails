@@ -1,11 +1,14 @@
 class BusinessesController < ApplicationController
   before_action :set_business, except: [:index, :create, :search]
 
+  # Rescue from 404 when record requested does not exist.
   rescue_from ActiveRecord::RecordNotFound do |e|
     render json: { errors: e }, status: :not_found
   end
 
+  # GET /businesses
   def index
+<<<<<<< Updated upstream
     render json: Business.order(created_at: :desc), include: [{
       address: {
         only: :street,
@@ -18,6 +21,37 @@ class BusinessesController < ApplicationController
       category: { only: :name },
       reviews: { only: :rating }
     }]
+=======
+    # Business records ordered by their created date
+    businesses = Business.all.sort_by(&:weekly_checkin_count).reverse
+    businesses.take(search_params[:limit].to_i) if search_params[:limit]
+
+    render json: businesses,
+           include: [
+             {
+               address: {
+                 only: :street,
+                 include: [
+                   suburb: {
+                     only: :name,
+                   },
+                   postcode: {
+                     only: :code,
+                   },
+                   state: {
+                     only: :name,
+                   },
+                 ],
+               },
+               category: {
+                 only: :name,
+               },
+               reviews: {
+                 only: :rating,
+               },
+             },
+           ]
+>>>>>>> Stashed changes
   end
 
   def search

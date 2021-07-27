@@ -9,4 +9,15 @@ class Business < ApplicationRecord
   validates :description, presence: true
 
   scope :filter_by_category, ->(category_id) { where category_id: category_id }
+<<<<<<< Updated upstream
+=======
+
+  def active_promotions
+    self.promotions.active
+  end
+
+  def weekly_checkin_count
+    self.checkins.where('created_at >= ?', DateTime.now - 7).count
+  end
+>>>>>>> Stashed changes
 end

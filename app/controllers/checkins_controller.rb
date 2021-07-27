@@ -1,6 +1,7 @@
 class CheckinsController < ApplicationController
   # Do not wrap params received from post in an additional named hash
   wrap_parameters false
+  # User must be logged in to check in at a business
   before_action :authenticate, only: :create
 
   # Will trigger if the given business_id or user_id is not valid
@@ -27,10 +28,13 @@ class CheckinsController < ApplicationController
   end
 
   def create
-    # Current user must match the given user_id, and must not be the owner of the business with the given business_id
+    # Find the user with the id for which a checkin is to be created
     @user = User.find(params[:user_id])
+    # A user may only "create" a checkin associated with their own user id
     return unless authorize(@user)
+    # Find the business for which a checkin is to be created
     @business = Business.find(params[:business_id])
+    # A user may not check in at a business of which they are the owner
     return if exclude(@business.user)
 
     @checkin = Checkin.new(checkin_params)

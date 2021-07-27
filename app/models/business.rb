@@ -6,6 +6,8 @@ class Business < ApplicationRecord
   has_many :reviews, through: :checkins
   has_many :promotions, dependent: :destroy
   has_one :address, required: true, dependent: :destroy
+  # Address association must be valid
+  validates_associated :address
 
   # Business name must be unique
   validates :name, presence: true, uniqueness: true

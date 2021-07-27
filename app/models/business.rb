@@ -14,4 +14,7 @@ class Business < ApplicationRecord
   def active_promotions
     self.promotions.active
   end
+  def weekly_checkin_count
+    self.checkins.where('created_at >= ?', DateTime.now - 7).count
+  end
 end

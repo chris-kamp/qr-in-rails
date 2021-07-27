@@ -1,6 +1,7 @@
 class PromotionsController < ApplicationController
   # Do not wrap params received from post in an additional named hash
   wrap_parameters false
+  # User must be logged in to create a new promotion
   before_action :authenticate, except: %i[index]
 
   # Will trigger if the given business_id is not valid
@@ -9,8 +10,11 @@ class PromotionsController < ApplicationController
   end
 
   def index
+    # Order promotions with most recently-created first
     promotions = Promotion.active.order(created_at: :desc)
+    # If a limit is given, limit to that number of results
     promotions.limit!(search_params[:limit]) if search_params[:limit]
+    # Render promotions in the format and with the associations required by the React application
     render json: promotions, include: [
       business: {
         include: {
@@ -35,7 +39,9 @@ class PromotionsController < ApplicationController
   end
 
   def create
+    # Find the business for which a promotion is being created
     @business = Business.find(params[:promotion][:business_id])
+    # Only the owner of that business may create a promotion for it
     return unless authorize(@business.user)
 
     # Create a promotion with given attributes

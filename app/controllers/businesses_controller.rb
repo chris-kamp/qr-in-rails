@@ -9,7 +9,13 @@ class BusinessesController < ApplicationController
   end
 
   def index
-    render json: Business.order(created_at: :desc),
+    # Business records ordered by their popularity
+    businesses = Business.all.sort_by(&:weekly_checkin_count).reverse
+    # Limit the amount of businesses returned to the :limit parameter
+    businesses = businesses.take(search_params[:limit].to_i) if search_params[:limit]
+    # Render the businesses, include related associations and the attributes
+    #   required from them
+    render json: businesses,
            include: [
              {
                address: {

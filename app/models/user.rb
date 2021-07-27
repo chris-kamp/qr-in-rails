@@ -1,6 +1,7 @@
 class User < ApplicationRecord
   has_secure_password
   has_one :business, dependent: :destroy
+  # Order checkins with most recent first
   has_many :checkins, -> { order(created_at: :desc) }, dependent: :destroy
   has_many :reviews, through: :checkins
 
@@ -35,6 +36,6 @@ class User < ApplicationRecord
               message:
                 'must contain at least one uppercase letter, one lowercase letter and one number',
             },
-            if: -> { password.present? }
+            if: -> { password.present? } # Runs validation only on the password itself (not the generated password_digest)
   validates :password_digest, presence: true
 end

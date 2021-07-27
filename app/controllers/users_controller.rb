@@ -12,6 +12,7 @@ class UsersController < ApplicationController
 
   # GET /users/:id
   def show
+    # Only the user may obtain non-public details about their own user account
     return unless authorize(@user)
     render json: @user, include: { business: { only: :id } }, except: [:password_digest]
   end
@@ -19,6 +20,7 @@ class UsersController < ApplicationController
   # GET /users/:id/public
   # Retrieve only publically available information about a user, without requiring authentication
   def show_public
+    # Render details of the user in the format and with the associations required by the React application
     render json: @user,
            only: %i[username profile_img_src bio],
            include: {
@@ -87,6 +89,7 @@ class UsersController < ApplicationController
 
   # PATCH/PUT /users/:id
   def update
+    # Only the user may update their own account details
     return unless authorize(@user)
     if @user.update(user_params)
       render json: @user, except: [:password_digest]

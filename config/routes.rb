@@ -15,12 +15,12 @@ Rails
       end
 
       # Create standard routes for other resources
-      resources :checkins, only: :create
+      resources :checkins, only: %i[create index]
       resources :reviews, only: :create
       resources :businesses do
         get :search, on: :collection
       end
-      resources :promotions, only: :create
+      resources :promotions, only: %i[create index]
       resources :categories, only: :index
     end
   end

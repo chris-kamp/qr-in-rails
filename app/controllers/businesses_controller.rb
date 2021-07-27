@@ -4,10 +4,12 @@ class BusinessesController < ApplicationController
   before_action :set_business, except: %i[index create search]
   before_action :authenticate, except: %i[index search show]
 
+  # Rescue from 404 when record requested does not exist.
   rescue_from ActiveRecord::RecordNotFound do |e|
     render json: { errors: e }, status: :not_found
   end
 
+  # GET /businesses
   def index
     # Business records ordered by their popularity
     businesses = Business.all.sort_by(&:weekly_checkin_count).reverse
@@ -22,36 +24,36 @@ class BusinessesController < ApplicationController
                  only: :street,
                  include: [
                    suburb: {
-                     only: :name,
+                     only: :name
                    },
                    postcode: {
-                     only: :code,
+                     only: :code
                    },
                    state: {
-                     only: :name,
-                   },
-                 ],
+                     only: :name
+                   }
+                 ]
                },
                category: {
-                 only: :name,
+                 only: :name
                },
                reviews: {
-                 only: :rating,
-               },
-             },
+                 only: :rating
+               }
+             }
            ]
   end
 
   def search
     filters =
       JSON(search_params[:filter])
-        .select { |_id, bool| bool }
-        .keys
-        .map { |id| id.to_s[(1..-1)].strip }
+      .select { |_id, bool| bool }
+      .keys
+      .map { |id| id.to_s[(1..-1)].strip }
     results =
       Business.where(
         'name ILIKE :search OR description ILIKE :search',
-        search: "%#{search_params[:search]}%",
+        search: "%#{search_params[:search]}%"
       )
 
     results = results.filter_by_category(filters) unless filters.empty?
@@ -63,31 +65,31 @@ class BusinessesController < ApplicationController
                  only: :street,
                  include: [
                    suburb: {
-                     only: :name,
+                     only: :name
                    },
                    postcode: {
-                     only: :code,
+                     only: :code
                    },
                    state: {
-                     only: :name,
-                   },
-                 ],
+                     only: :name
+                   }
+                 ]
                },
                category: {
-                 only: :name,
+                 only: :name
                },
                reviews: {},
                checkins: {
                  include: [
                    user: {
-                     only: :username,
+                     only: :username
                    },
                    review: {
-                     only: %i[rating content],
-                   },
-                 ],
-               },
-             },
+                     only: %i[rating content]
+                   }
+                 ]
+               }
+             }
            ]
   end
 
@@ -100,40 +102,45 @@ class BusinessesController < ApplicationController
                  only: :street,
                  include: [
                    suburb: {
-                     only: :name,
+                     only: :name
                    },
                    postcode: {
-                     only: :code,
+                     only: :code
                    },
                    state: {
-                     only: :name,
-                   },
-                 ],
+                     only: :name
+                   }
+                 ]
                },
                category: {
-                 only: :name,
+                 only: :name
                },
                reviews: {},
                checkins: {
                  include: [
                    user: {
-                     only: %i[id username profile_img_src],
+                     only: %i[id username profile_img_src]
                    },
                    business: {
-                     only: %i[name id listing_img_src],
+                     only: %i[name id listing_img_src]
                    },
                    review: {
-                     only: %i[rating content],
-                   },
-                 ],
-               },
-             },
+                     only: %i[rating content]
+                   }
+                 ]
+               }
+             }
            ]
   end
 
   def create
     # Create a Busines with the business_params function as attributes.
-    business = Business.new(business_params)
+    business = Business.new(**business_params, address: Address.create(
+      street: address_params[:street],
+      suburb: Suburb.find_or_create_by(name: address_params[:suburb]),
+      postcode: Postcode.find_or_create_by(code: address_params[:postcode]),
+      state: State.find_or_create_by(name: address_params[:state])
+    ))
 
     # If the business was created successfully, return the business, otherwise a 422 unprocessable entity.
     if business.save
@@ -145,6 +152,7 @@ class BusinessesController < ApplicationController
 
   def update
     return unless authorize(@business.user)
+
     if @business.update(business_params)
       render json: @business
     else
@@ -154,6 +162,7 @@ class BusinessesController < ApplicationController
 
   def destroy
     return unless authorize(@business.user)
+
     if @business.destroy
       render status: :no_content
     else
@@ -169,35 +178,22 @@ class BusinessesController < ApplicationController
 
   def business_params
     # Permit only the attributes expected for Business.
-    business =
-      params
-        .require(:business)
-        .permit(
-          :category_id,
-          :user_id,
-          :name,
-          :description,
-          :listing_img_src,
-          address: %i[street suburb postcode state],
-        )
+    params
+      .require(:business)
+      .permit(
+        :category_id,
+        :user_id,
+        :name,
+        :description,
+        :listing_img_src
+      )
+  end
 
-    # Change the [:address] object into the Address model, with Suburb, Postcode, State associations
-    # using find_or_create_by to limit duplicate data.
-    unless business[:address].nil?
-      business[:address] =
-        Address.new(
-          street: business[:address][:street],
-          suburb: Suburb.find_or_create_by(name: business[:address][:suburb]),
-          postcode:
-            Postcode.find_or_create_by(code: business[:address][:postcode]),
-          state: State.find_or_create_by(name: business[:address][:state]),
-        )
-    end
-
-    business
+  def address_params
+    params.require(:business).require(:address).permit(:street, :suburb, :postcode, :state)
   end
 
   def search_params
-    params.permit(:search, :filter)
+    params.permit(:search, :filter, :limit)
   end
 end

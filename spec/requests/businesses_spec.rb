@@ -23,6 +23,7 @@ RSpec.describe '/businesses', type: :request do
     Business.destroy_all
     Category.destroy_all
     @email = 'test@test.com'
+    @email2 = 'test2@test2.com'
     @user =
       User.create!(
         email: @email,
@@ -30,6 +31,14 @@ RSpec.describe '/businesses', type: :request do
         username: 'foobar',
         public: true,
         bio: "Hi, I'm a user",
+      )
+    @non_owner =
+      User.create!(
+        email: @email2,
+        password: 'Secrets2',
+        username: 'ahacker',
+        public: true,
+        bio: "I'm not the business owner!",
       )
     @category = Category.create!(name: 'bar')
     @address =
@@ -41,6 +50,10 @@ RSpec.describe '/businesses', type: :request do
       )
     @payload = { email: @email, exp: Time.now.to_i + 3600 }
     @token = JWT.encode(@payload, ENV['JWT_KEY'], 'HS512')
+    @expired_payload = { email: @email, exp: Time.now.to_i - 3600 }
+    @expired_token = JWT.encode(@expired_payload, ENV['JWT_KEY'], 'HS512')
+    @non_owner_payload = { email: @email2, exp: Time.now.to_i + 3600 }
+    @non_owner_token = JWT.encode(@non_owner_payload, ENV['JWT_KEY'], 'HS512')
   end
 
   let(:valid_attributes) do
@@ -61,13 +74,25 @@ RSpec.describe '/businesses', type: :request do
   # in order to pass any filters (e.g. authentication) defined in
   # BusinessesController, or in your router and rack
   # middleware. Be sure to keep this updated too.
-  let(:valid_headers) { { 'Authorization': "Bearer #{@token}" } }
+  let(:valid_headers) { { Authorization: "Bearer #{@token}" } }
+  let(:expired_token_headers) do
+    { Authorization: "Bearer #{@expired_token}" }
+  end
+  let(:non_owner_headers) { { Authorization: "Bearer #{@non_owner_token}" } }
 
   describe 'GET /index' do
     it 'renders a successful response' do
       Business.create! valid_attributes
       get businesses_url, headers: valid_headers, as: :json
       expect(response).to be_successful
+    end
+    it "renders a JSON response with a collection of businesses" do
+      Business.create! valid_attributes
+      get businesses_url, headers: valid_headers, as: :json
+      expect(response.content_type).to match(
+        a_string_including('application/json'),
+      )
+      expect(response.parsed_body[0]['name']).to eq('foo')
     end
   end
 
@@ -77,10 +102,18 @@ RSpec.describe '/businesses', type: :request do
       get business_url(business), as: :json
       expect(response).to be_successful
     end
+    it 'renders a JSON response with the business' do
+      business = Business.create! valid_attributes
+      get business_url(business), as: :json
+      expect(response.content_type).to match(
+        a_string_including('application/json'),
+      )
+      expect(response.parsed_body['name']).to eq('foo')
+    end
   end
 
   describe 'POST /create' do
-    context 'with valid parameters' do
+    context 'with valid parameters and headers' do
       it 'creates a new Business' do
         expect {
           post businesses_url,
@@ -113,6 +146,7 @@ RSpec.describe '/businesses', type: :request do
                params: {
                  business: invalid_attributes,
                },
+               headers: valid_headers,
                as: :json
         }.to change(Business, :count).by(0)
       end
@@ -130,25 +164,58 @@ RSpec.describe '/businesses', type: :request do
         )
       end
     end
+
+    context 'without auth token' do
+      it 'does not create a new Business' do
+        expect {
+          post businesses_url, params: { business: valid_attributes }, as: :json
+        }.to change(Business, :count).by(0)
+      end
+      it 'responds with unauthorized status' do
+        post businesses_url, params: { business: valid_attributes }, as: :json
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+
+    context 'with expired auth token' do
+      it 'does not create a new Business' do
+        expect {
+          post businesses_url,
+               params: {
+                 business: valid_attributes,
+               },
+               headers: expired_token_headers,
+               as: :json
+        }.to change(Business, :count).by(0)
+      end
+      it 'responds with unauthorized status' do
+        post businesses_url,
+             params: {
+               business: invalid_attributes,
+             },
+             headers: expired_token_headers,
+             as: :json
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
   end
 
   describe 'PATCH /update' do
-    context 'with valid parameters' do
-      let(:new_attributes) do
-        {
-          user_id: @user.id,
-          category_id: @category.id,
-          name: 'bar',
-          description: 'bar',
-          address: @address,
-        }
-      end
-
+    let(:valid_new_attributes) do
+      {
+        user_id: @user.id,
+        category_id: @category.id,
+        name: 'bar',
+        description: 'bar',
+        address: @address,
+      }
+    end
+    context 'with valid parameters and headers' do
       it 'updates the requested business' do
         business = Business.create! valid_attributes
         patch business_url(business),
               params: {
-                business: new_attributes,
+                business: valid_new_attributes,
               },
               headers: valid_headers,
               as: :json
@@ -160,7 +227,7 @@ RSpec.describe '/businesses', type: :request do
         business = Business.create! valid_attributes
         patch business_url(business),
               params: {
-                business: new_attributes,
+                business: valid_new_attributes,
               },
               headers: valid_headers,
               as: :json
@@ -168,10 +235,22 @@ RSpec.describe '/businesses', type: :request do
         expect(response.content_type).to match(
           a_string_including('application/json'),
         )
+        expect(response.parsed_body['description']).to eq('bar')
       end
     end
 
     context 'with invalid parameters' do
+      it 'does not update the business' do
+        business = Business.create! valid_attributes
+        patch business_url(business),
+              params: {
+                business: invalid_attributes,
+              },
+              headers: valid_headers,
+              as: :json
+        business.reload
+        expect(business.name).to eq('foo')
+      end
       it 'renders a JSON response with errors for the business' do
         business = Business.create! valid_attributes
         patch business_url(business),
@@ -186,14 +265,138 @@ RSpec.describe '/businesses', type: :request do
         )
       end
     end
+
+    context 'without auth token' do
+      it 'does not update the business' do
+        business = Business.create! valid_attributes
+        patch business_url(business),
+              params: {
+                business: valid_new_attributes,
+              },
+              as: :json
+        business.reload
+        expect(business.name).to eq('foo')
+      end
+      it 'responds with unauthorized status' do
+        business = Business.create! valid_attributes
+        patch business_url(business),
+              params: {
+                business: valid_new_attributes,
+              },
+              as: :json
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+
+    context 'with expired auth token' do
+      it 'does not update the business' do
+        business = Business.create! valid_attributes
+        patch business_url(business),
+              params: {
+                business: valid_new_attributes,
+              },
+              headers: expired_token_headers,
+              as: :json
+        business.reload
+        expect(business.name).to eq('foo')
+      end
+      it 'responds with unauthorized status' do
+        business = Business.create! valid_attributes
+        patch business_url(business),
+              params: {
+                business: valid_new_attributes,
+              },
+              headers: expired_token_headers,
+              as: :json
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+
+    context 'where user is not the business owner' do
+      it 'does not update the business' do
+        business = Business.create! valid_attributes
+        patch business_url(business),
+              params: {
+                business: valid_new_attributes,
+              },
+              headers: non_owner_headers,
+              as: :json
+        business.reload
+        expect(business.name).to eq('foo')
+      end
+      it 'responds with forbidden status' do
+        business = Business.create! valid_attributes
+        patch business_url(business),
+              params: {
+                business: valid_new_attributes,
+              },
+              headers: non_owner_headers,
+              as: :json
+        expect(response).to have_http_status(:forbidden)
+      end
+    end
   end
 
   describe 'DELETE /destroy' do
-    it 'destroys the requested business' do
-      business = Business.create! valid_attributes
-      expect {
-        delete business_url(business), headers: valid_headers, as: :json
-      }.to change(Business, :count).by(-1)
+    context 'with valid headers' do
+      it 'destroys the requested business' do
+        business = Business.create! valid_attributes
+        expect {
+          delete business_url(business), headers: valid_headers, as: :json
+        }.to change(Business, :count).by(-1)
+      end
+    end
+    context 'without auth token' do
+      it 'does not destroy the requested business' do
+        business = Business.create! valid_attributes
+        expect { delete business_url(business), as: :json }.to change(
+          Business,
+          :count,
+        ).by(0)
+      end
+      it 'responds with unauthorized status' do
+        business = Business.create! valid_attributes
+        delete business_url(business), as: :json
+        expect(response).to have_http_status(:unauthorized)
+      end
+      it 'does not destroy the requested business' do
+        business = Business.create! valid_attributes
+        expect { delete business_url(business), as: :json }.to change(
+          Business,
+          :count,
+        ).by(0)
+      end
+    end
+
+    context 'with expired auth token' do
+      it 'does not destroy the requested business' do
+        business = Business.create! valid_attributes
+        expect {
+          delete business_url(business),
+                 headers: expired_token_headers,
+                 as: :json
+        }.to change(Business, :count).by(0)
+      end
+      it 'responds with unauthorized status' do
+        business = Business.create! valid_attributes
+        delete business_url(business), headers: expired_token_headers, as: :json
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+
+    context 'where user is not the business owner' do
+      it 'does not destroy the requested business' do
+        business = Business.create! valid_attributes
+        expect {
+          delete business_url(business), headers: non_owner_headers, as: :json
+        }.to change(Business, :count).by(0)
+      end
+      it 'responds with forbidden status' do
+        business = Business.create! valid_attributes
+
+        delete business_url(business), headers: non_owner_headers, as: :json
+        expect(response).to have_http_status(:forbidden)
+      end
     end
   end
 end

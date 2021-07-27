@@ -6,6 +6,7 @@ class Business < ApplicationRecord
   has_many :promotions, dependent: :destroy
   has_one :address, required: true, dependent: :destroy
 
+  validates_associated :address
   validates :name, presence: true, uniqueness: true
   validates :description, presence: true
 
@@ -13,5 +14,9 @@ class Business < ApplicationRecord
 
   def active_promotions
     self.promotions.active
+  end
+
+  def weekly_checkin_count
+    self.checkins.where('created_at >= ?', DateTime.now - 7).count
   end
 end

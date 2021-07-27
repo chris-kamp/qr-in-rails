@@ -16,11 +16,11 @@ class Business < ApplicationRecord
 
   # Retrieve active promotions associated with the business (using the "active" scope of the promotion model)
   def active_promotions
-    self.promotions.active
+    return promotions.active
   end
 
   # Get the number of checkins created for a business in the past 7 days
   def weekly_checkin_count
-    self.checkins.where('created_at >= ?', DateTime.now - 7).count
+    return checkins.where('created_at >= ?', DateTime.now - 7).count
   end
 end

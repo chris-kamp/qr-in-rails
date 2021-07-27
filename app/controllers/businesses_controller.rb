@@ -45,8 +45,11 @@ class BusinessesController < ApplicationController
   end
 
   # Given search parameters (filter and search), render only the results matching those parameters
+  # GET /businesses/search{?search=""&filter=""}
   def search
-    # Get category IDs to filter by
+    # Parse the filter parameter into an array of matching category_ids where
+    #   their boolean value is true (ie: they have been selected)
+    #   [_1: true, _2: false, _3: true] becomes the array: [1, 3]
     filters =
       JSON(search_params[:filter])
       # Select those keys (category IDs) set to true in search params
@@ -60,7 +63,9 @@ class BusinessesController < ApplicationController
         'name ILIKE :search OR description ILIKE :search',
         search: "%#{search_params[:search]}%"
       )
-    # Filter search results to obtain those which match the filtered categories
+
+    # Filter the results by their category_id determined by the above `filters`
+    #   array variable. If there were no filters specified skip this step.
     results = results.filter_by_category(filters) unless filters.empty?
 
     # Render results in the format and with the associations required by the React application
@@ -99,8 +104,11 @@ class BusinessesController < ApplicationController
            ]
   end
 
+  # GET /businesses/:id
   def show
-    # Render the business with the given ID in the format and with the associations required by the React application
+    # Return a single business as retrieved by the set_business private function
+    #   along with associated entities and the :active_promotions method as
+    #   declared in the Business model.
     render json: @business,
            methods: :active_promotions,
            include: [
@@ -157,6 +165,7 @@ class BusinessesController < ApplicationController
     # authorize will fail and render forbidden status if logged in user does not match @business.user (ie. the business owner)
     return unless authorize(@business.user)
 
+    # Update the business with the given filtered parameters.
     if @business.update(business_params)
       render json: @business
     else
@@ -169,6 +178,7 @@ class BusinessesController < ApplicationController
     # authorize will fail and render forbidden status if logged in user does not match @business.user (ie. the business owner)
     return unless authorize(@business.user)
 
+    # Destroy the business record.
     if @business.destroy
       render status: :no_content
     else
@@ -178,6 +188,7 @@ class BusinessesController < ApplicationController
 
   private
 
+  # Retrieve the business as specified in the params by :id
   def set_business
     @business = Business.find(params[:id])
   end
@@ -213,6 +224,7 @@ class BusinessesController < ApplicationController
   end
 
   def search_params
+    # Permitted params for a search operation
     params.permit(:search, :filter, :limit)
   end
 end

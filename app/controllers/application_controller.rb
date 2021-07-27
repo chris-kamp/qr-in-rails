@@ -18,7 +18,7 @@ class ApplicationController < ActionController::API
 
   def authorize(permitted_user)
     unless @current_user == permitted_user
-      render status: :unauthorized
+      render status: :forbidden
       return false
     end
     return true

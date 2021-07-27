@@ -14,7 +14,7 @@ class BusinessesController < ApplicationController
     # Business records ordered by their popularity
     businesses = Business.all.sort_by(&:weekly_checkin_count).reverse
     # Limit the amount of businesses returned to the :limit parameter
-    businesses.take(search_params[:limit].to_i) if search_params[:limit]
+    businesses = businesses.take(search_params[:limit].to_i) if search_params[:limit]
     # Render the businesses, include related associations and the attributes
     #   required from them
     render json: businesses,
@@ -147,7 +147,12 @@ class BusinessesController < ApplicationController
 
   def create
     # Create a Busines with the business_params function as attributes.
-    business = Business.new(business_params)
+    business = Business.new(**business_params, address: Address.create(
+      street: address_params[:street],
+      suburb: Suburb.find_or_create_by(name: address_params[:suburb]),
+      postcode: Postcode.find_or_create_by(code: address_params[:postcode]),
+      state: State.find_or_create_by(name: address_params[:state])
+    ))
 
     # If the business was created successfully, return the business, otherwise a 422 unprocessable entity.
     if business.save
@@ -190,32 +195,19 @@ class BusinessesController < ApplicationController
 
   def business_params
     # Permit only the attributes expected for Business.
-    business =
-      params
+    params
       .require(:business)
       .permit(
         :category_id,
         :user_id,
         :name,
         :description,
-        :listing_img_src,
-        address: %i[street suburb postcode state]
+        :listing_img_src
       )
+  end
 
-    # Change the [:address] object into the Address model, with Suburb, Postcode, State associations
-    # using find_or_create_by to limit duplicate data.
-    unless business[:address].nil?
-      business[:address] =
-        Address.new(
-          street: business[:address][:street],
-          suburb: Suburb.find_or_create_by(name: business[:address][:suburb]),
-          postcode:
-            Postcode.find_or_create_by(code: business[:address][:postcode]),
-          state: State.find_or_create_by(name: business[:address][:state])
-        )
-    end
-
-    business
+  def address_params
+    params.require(:business).require(:address).permit(:street, :suburb, :postcode, :state)
   end
 
   def search_params

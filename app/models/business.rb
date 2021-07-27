@@ -6,6 +6,7 @@ class Business < ApplicationRecord
   has_many :promotions, dependent: :destroy
   has_one :address, required: true, dependent: :destroy
 
+  validates_associated :address
   # Validation of business attributes
   validates :name, presence: true, uniqueness: true
   validates :description, presence: true
@@ -17,6 +18,7 @@ class Business < ApplicationRecord
   def active_promotions
     return promotions.active
   end
+
 
   # Number of checkins created for this business in the last week
   def weekly_checkin_count
